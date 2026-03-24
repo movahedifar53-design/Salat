@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c192" width="192" height="192"></canvas>
+<canvas id="c512" width="512" height="512"></canvas>
+<script>
+function draw(canvas, size) {
+  const ctx = canvas.getContext('2d');
+  // Background
+  ctx.fillStyle = '#0D2818';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, size, size, size * 0.18);
+  ctx.fill();
+
+  const cx = size / 2;
+  const cy = size / 2;
+
+  // Crescent moon
+  const r1 = size * 0.32;
+  const r2 = size * 0.24;
+  ctx.fillStyle = '#D4AF37';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#0D2818';
+  ctx.beginPath();
+  ctx.arc(cx + size * 0.12, cy - size * 0.04, r2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Download
+  canvas.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `icon-${size}.png`;
+    a.click();
+  });
+}
+
+draw(document.getElementById('c192'), 192);
+draw(document.getElementById('c512'), 512);
+</script>
+<p>Icons should auto-download. If not, right-click the canvases and save.</p>
+</body>
+</html>

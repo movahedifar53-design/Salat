@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D2818">
+<link rel="manifest" href="manifest.json">
+<title>Salat Times</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0D2818;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  user-select: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(27, 58, 45, 0.95);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.header {
+  background: rgba(13, 40, 24, 0.95);
+  padding: 18px 16px 14px;
+  text-align: center;
+}
+
+.city-selector {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.city-btn {
+  background: transparent;
+  border: 1.5px solid #D4AF37;
+  color: #D4AF37;
+  padding: 5px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.city-btn.active {
+  background: #D4AF37;
+  color: #0D2818;
+}
+
+.date-display {
+  color: #D4AF37;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.date-sub {
+  color: rgba(224, 224, 224, 0.7);
+  font-size: 12px;
+}
+
+.times {
+  padding: 8px 16px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+.row:nth-child(even) {
+  background: rgba(255,255,255,0.03);
+}
+
+.row.highlight {
+  background: rgba(212, 175, 55, 0.18);
+  border-left: 3px solid #D4AF37;
+}
+
+.row.highlight .prayer-name {
+  color: #D4AF37;
+}
+
+.prayer-name {
+  font-size: 14px;
+  color: rgba(224, 224, 224, 0.8);
+  font-weight: 500;
+}
+
+.prayer-time {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.nav {
+  display: flex;
+  background: rgba(13, 40, 24, 0.95);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 14px;
+  color: #D4AF37;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.nav-btn:active {
+  background: rgba(212, 175, 55, 0.15);
+}
+
+.nav-btn.today-btn {
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+
+.source {
+  margin-top: 16px;
+  color: rgba(212, 175, 55, 0.35);
+  font-size: 11px;
+  text-align: center;
+}
+
+.install-hint {
+  margin-top: 12px;
+  color: rgba(255,255,255,0.3);
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.swipe-area {
+  touch-action: pan-y;
+}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="header">
+    <div class="city-selector">
+      <button class="city-btn active" data-city="birmingham">Birmingham</button>
+      <button class="city-btn" data-city="london">London</button>
+    </div>
+    <div class="date-display" id="dateDisplay">24 March 2026</div>
+    <div class="date-sub" id="dateSub">Today</div>
+  </div>
+
+  <div class="times swipe-area" id="timesContainer">
+    <div class="row" data-prayer="imsaak">
+      <span class="prayer-name">Imsaak</span>
+      <span class="prayer-time" id="t-imsaak">--:--</span>
+    </div>
+    <div class="row" data-prayer="dawn">
+      <span class="prayer-name">Dawn (Fajr)</span>
+      <span class="prayer-time" id="t-dawn">--:--</span>
+    </div>
+    <div class="row" data-prayer="sunrise">
+      <span class="prayer-name">Sunrise</span>
+      <span class="prayer-time" id="t-sunrise">--:--</span>
+    </div>
+    <div class="row" data-prayer="noon">
+      <span class="prayer-name">Noon (Dhuhr)</span>
+      <span class="prayer-time" id="t-noon">--:--</span>
+    </div>
+    <div class="row" data-prayer="sunset">
+      <span class="prayer-name">Sunset</span>
+      <span class="prayer-time" id="t-sunset">--:--</span>
+    </div>
+    <div class="row" data-prayer="maghrib">
+      <span class="prayer-name">Maghrib</span>
+      <span class="prayer-time" id="t-maghrib">--:--</span>
+    </div>
+    <div class="row" data-prayer="midnight">
+      <span class="prayer-name">Midnight</span>
+      <span class="prayer-time" id="t-midnight">--:--</span>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="btnPrev">&#9664;  Prev</button>
+    <button class="nav-btn today-btn" id="btnToday">Today</button>
+    <button class="nav-btn" id="btnNext">Next  &#9654;</button>
+  </div>
+</div>
+
+<div class="source">Source: najaf.org</div>
+<div class="install-hint" id="installHint">
+  Tap the browser menu &#8942; &rarr; "Add to Home screen"<br>to use as a widget
+</div>
+
+<script>
+// Prayer time data will be loaded from external files
+let DATA = {};
+let currentCity = localStorage.getItem('salat-city') || 'birmingham';
+let dayOffset = 0;
+
+const prayers = ['imsaak','dawn','sunrise','noon','sunset','maghrib','midnight'];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+async function loadData(city) {
+  if (DATA[city]) return;
+  const resp = await fetch(`data_${city}.json`);
+  DATA[city] = await resp.json();
+}
+
+async function init() {
+  await loadData(currentCity);
+  render();
+  setupEvents();
+  // Update highlight every minute
+  setInterval(() => { if (dayOffset === 0) render(); }, 60000);
+}
+
+function getToday() {
+  const d = new Date();
+  d.setDate(d.getDate() + dayOffset);
+  return d;
+}
+
+function findPrayer(city, month, day) {
+  const data = DATA[city];
+  if (!data) return null;
+  return data.find(p => p.month === month && p.day === day) || null;
+}
+
+function render() {
+  const d = getToday();
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const pt = findPrayer(currentCity, month, day);
+
+  // Date display
+  const dateDisplay = document.getElementById('dateDisplay');
+  const dateSub = document.getElementById('dateSub');
+  dateDisplay.textContent = `${day} ${months[month - 1]} ${d.getFullYear()}`;
+
+  if (dayOffset === 0) {
+    dateSub.textContent = 'Today';
+  } else if (dayOffset === 1) {
+    dateSub.textContent = 'Tomorrow';
+  } else if (dayOffset === -1) {
+    dateSub.textContent = 'Yesterday';
+  } else {
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    dateSub.textContent = days[d.getDay()];
+  }
+
+  // Prayer times
+  prayers.forEach(p => {
+    document.getElementById(`t-${p}`).textContent = pt ? pt[p] : '--:--';
+  });
+
+  // Highlight next prayer (only for today)
+  const rows = document.querySelectorAll('.row');
+  rows.forEach(r => r.classList.remove('highlight'));
+
+  if (dayOffset === 0 && pt) {
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
+    for (const p of prayers) {
+      const [h, m] = pt[p].split(':').map(Number);
+      const pMins = h * 60 + m;
+      if (pMins > nowMins) {
+        const row = document.querySelector(`[data-prayer="${p}"]`);
+        if (row) row.classList.add('highlight');
+        break;
+      }
+    }
+  }
+}
+
+function setupEvents() {
+  // City buttons
+  document.querySelectorAll('.city-btn').forEach(btn => {
+    if (btn.dataset.city === currentCity) btn.classList.add('active');
+    else btn.classList.remove('active');
+
+    btn.addEventListener('click', async () => {
+      currentCity = btn.dataset.city;
+      localStorage.setItem('salat-city', currentCity);
+      document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      await loadData(currentCity);
+      render();
+    });
+  });
+
+  // Nav buttons
+  document.getElementById('btnPrev').addEventListener('click', () => {
+    dayOffset--;
+    render();
+  });
+
+  document.getElementById('btnNext').addEventListener('click', () => {
+    dayOffset++;
+    render();
+  });
+
+  document.getElementById('btnToday').addEventListener('click', () => {
+    dayOffset = 0;
+    render();
+  });
+
+  // Swipe navigation
+  let touchStartX = 0;
+  const swipeArea = document.getElementById('timesContainer');
+
+  swipeArea.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  swipeArea.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 60) {
+      if (diff > 0) dayOffset--;
+      else dayOffset++;
+      render();
+    }
+  }, { passive: true });
+}
+
+// Hide install hint if already installed as PWA
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  document.getElementById('installHint').style.display = 'none';
+}
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+
+init();
+</script>
+</body>
+</html>
