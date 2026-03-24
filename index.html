@@ -173,12 +173,8 @@ body {
   </div>
 
   <div class="times swipe-area" id="timesContainer">
-    <div class="row" data-prayer="imsaak">
-      <span class="prayer-name">Imsaak</span>
-      <span class="prayer-time" id="t-imsaak">--:--</span>
-    </div>
     <div class="row" data-prayer="dawn">
-      <span class="prayer-name">Dawn (Fajr)</span>
+      <span class="prayer-name">Fajr</span>
       <span class="prayer-time" id="t-dawn">--:--</span>
     </div>
     <div class="row" data-prayer="sunrise">
@@ -210,7 +206,7 @@ body {
   </div>
 </div>
 
-<div class="source">Source: najaf.org</div>
+<div class="source">Fajr: openfajr.org | Other times: najaf.org</div>
 <div class="install-hint" id="installHint">
   Tap the browser menu &#8942; &rarr; "Add to Home screen"<br>to use as a widget
 </div>
@@ -221,7 +217,7 @@ let DATA = {};
 let currentCity = localStorage.getItem('salat-city') || 'birmingham';
 let dayOffset = 0;
 
-const prayers = ['imsaak','dawn','sunrise','noon','sunset','maghrib','midnight'];
+const prayers = ['dawn','sunrise','noon','sunset','maghrib','midnight'];
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 async function loadData(city) {
