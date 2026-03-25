@@ -208,10 +208,7 @@ body {
   </div>
 </div>
 
-<div class="source">
-  Fajr according to <a href="https://openfajr.org" target="_blank" style="color:inherit;text-decoration:underline">openfajr.org</a><br>
-  Other times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>
-</div>
+<div class="source" id="sourceText"></div>
 <div class="install-hint" id="installHint">
   Tap the browser menu &#8942; &rarr; "Add to Home screen"<br>to use as a widget
 </div>
@@ -277,6 +274,14 @@ function render() {
   prayers.forEach(p => {
     document.getElementById(`t-${p}`).textContent = pt ? pt[p] : '--:--';
   });
+
+  // Update source attribution
+  const sourceEl = document.getElementById('sourceText');
+  if (currentCity === 'birmingham') {
+    sourceEl.innerHTML = 'Fajr according to <a href="https://openfajr.org" target="_blank" style="color:inherit;text-decoration:underline">openfajr.org</a><br>Other times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>';
+  } else {
+    sourceEl.innerHTML = 'All times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>';
+  }
 
   // Highlight next prayer (only for today)
   const rows = document.querySelectorAll('.row');
