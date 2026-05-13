@@ -1,9 +1,10 @@
-const CACHE_NAME = 'salat-v6';
+const CACHE_NAME = 'salat-v7';
 const ASSETS = [
   './',
   './index.html',
   './data_birmingham.json',
   './data_london.json',
+  './data_toronto.json',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -11,7 +12,7 @@ const ASSETS = [
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
-  self.skipWaiting();
+  // No skipWaiting here — we wait for the user to tap "Reload" in the banner.
 });
 
 self.addEventListener('activate', e => {
@@ -21,6 +22,12 @@ self.addEventListener('activate', e => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', e => {

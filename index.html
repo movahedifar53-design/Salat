@@ -50,7 +50,7 @@ body {
   background: transparent;
   border: 1.5px solid #D4AF37;
   color: #D4AF37;
-  padding: 5px 18px;
+  padding: 5px 14px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
@@ -160,6 +160,46 @@ body {
 .swipe-area {
   touch-action: pan-y;
 }
+
+#updateBanner {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  background: #D4AF37;
+  color: #0D2818;
+  padding: 12px 16px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  max-width: calc(100% - 32px);
+  z-index: 1000;
+}
+
+#updateBanner.show {
+  display: flex;
+}
+
+#updateBanner button {
+  background: #0D2818;
+  color: #D4AF37;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#updateBanner .dismiss {
+  background: transparent;
+  color: #0D2818;
+  padding: 7px 6px;
+}
 </style>
 </head>
 <body>
@@ -169,6 +209,7 @@ body {
     <div class="city-selector">
       <button class="city-btn active" data-city="birmingham">Birmingham</button>
       <button class="city-btn" data-city="london">London</button>
+      <button class="city-btn" data-city="toronto">Toronto</button>
     </div>
     <div class="date-display" id="dateDisplay">24 March 2026</div>
     <div class="date-sub" id="dateSub">Today</div>
@@ -211,6 +252,12 @@ body {
 <div class="source" id="sourceText"></div>
 <div class="install-hint" id="installHint">
   Tap the browser menu &#8942; &rarr; "Add to Home screen"<br>to use as a widget
+</div>
+
+<div id="updateBanner">
+  <span>New version available</span>
+  <button id="updateReload">Reload</button>
+  <button class="dismiss" id="updateDismiss" aria-label="Dismiss">&times;</button>
 </div>
 
 <script>
@@ -279,8 +326,10 @@ function render() {
   const sourceEl = document.getElementById('sourceText');
   if (currentCity === 'birmingham') {
     sourceEl.innerHTML = 'Fajr according to <a href="https://openfajr.org" target="_blank" style="color:inherit;text-decoration:underline">openfajr.org</a><br>Other times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>';
-  } else {
+  } else if (currentCity === 'london') {
     sourceEl.innerHTML = 'All times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>';
+  } else if (currentCity === 'toronto') {
+    sourceEl.innerHTML = 'All times according to <a href="http://www.valieasr.org/calendar/Prayer-Times.htm" target="_blank" style="color:inherit;text-decoration:underline">valieasr.org</a>';
   }
 
   // Highlight next prayer (only for today)
@@ -358,9 +407,53 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
   document.getElementById('installHint').style.display = 'none';
 }
 
-// Register service worker
+// Register service worker with update notification
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
+  const banner = document.getElementById('updateBanner');
+  const reloadBtn = document.getElementById('updateReload');
+  const dismissBtn = document.getElementById('updateDismiss');
+  let waitingWorker = null;
+
+  function showUpdateBanner(worker) {
+    waitingWorker = worker;
+    banner.classList.add('show');
+  }
+
+  dismissBtn.addEventListener('click', () => banner.classList.remove('show'));
+  reloadBtn.addEventListener('click', () => {
+    if (waitingWorker) waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    // iOS Safari sometimes doesn't fire controllerchange promptly — force
+    // reload after a short delay as a safety net.
+    setTimeout(() => window.location.reload(), 1200);
+  });
+
+  // Reload once the new SW takes control (avoids reload loops via guard).
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // If an updated SW is already waiting when the page loads
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      showUpdateBanner(reg.waiting);
+    }
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener('statechange', () => {
+        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBanner(sw);
+        }
+      });
+    });
+    // Check for updates whenever the app regains focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update();
+    });
+  });
 }
 
 init();
