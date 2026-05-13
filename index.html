@@ -825,22 +825,33 @@ if ('serviceWorker' in navigator) {
   });
 
   navigator.serviceWorker.register('./sw.js').then(reg => {
-    // If an updated SW is already waiting when the page loads
-    if (reg.waiting && navigator.serviceWorker.controller) {
-      showUpdateBanner(reg.waiting);
-    }
+    // Show the banner whenever a SW is waiting. On first install reg.waiting
+    // is never set (the new SW becomes active directly), so we don't need
+    // the navigator.serviceWorker.controller gate -- which was unreliable
+    // on iOS Safari cold-starts where controller is briefly null.
+    if (reg.waiting) showUpdateBanner(reg.waiting);
+
     reg.addEventListener('updatefound', () => {
       const sw = reg.installing;
       if (!sw) return;
       sw.addEventListener('statechange', () => {
-        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+        if (sw.state === 'installed' && reg.active) {
+          // reg.active being present means there was a previous SW -- this
+          // is an update, not a first install.
           showUpdateBanner(sw);
         }
       });
     });
-    // Check for updates whenever the app regains focus
+
+    // Re-fetch sw.js whenever the app comes back to the foreground.
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') reg.update();
+    });
+
+    // Fallback: re-check the registration state via the ready promise.
+    // On iOS PWAs the registration sometimes settles after our first check.
+    navigator.serviceWorker.ready.then(r => {
+      if (r.waiting) showUpdateBanner(r.waiting);
     });
   });
 }

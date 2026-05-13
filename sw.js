@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salat-v9';
+const CACHE_NAME = 'salat-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -10,10 +10,12 @@ const ASSETS = [
   './icon-512.png'
 ];
 
-// Caches from releases that pre-date the in-app update banner.
-// Clients running those releases can't react to a "waiting" SW, so when
-// we see them we skipWaiting() and force-reload their windows.
-const PRE_BANNER_CACHES = ['salat-v6', 'salat-v7'];
+// Caches whose clients can't be trusted to surface our update banner --
+// pre-banner releases (v6) and releases with a banner-detection bug
+// on iOS Safari (v7, v8, v9). When we see one we skipWaiting() and
+// force-reload the windows. v10 onward uses the fixed banner code, so
+// future releases shouldn't need to be added here.
+const PRE_BANNER_CACHES = ['salat-v6', 'salat-v7', 'salat-v8', 'salat-v9'];
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
