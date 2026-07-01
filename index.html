@@ -42,6 +42,7 @@ body {
 .city-selector {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
 }
@@ -398,6 +399,7 @@ body {
     <div class="city-selector">
       <button class="city-btn active" data-city="birmingham">Birmingham</button>
       <button class="city-btn" data-city="london">London</button>
+      <button class="city-btn" data-city="munich">Munich</button>
       <button class="city-btn" data-city="toronto">Toronto</button>
     </div>
     <div class="date-display" id="dateDisplay">24 March 2026</div>
@@ -555,6 +557,8 @@ function render() {
     sourceEl.innerHTML = 'Fajr according to <a href="https://openfajr.org" target="_blank" style="color:inherit;text-decoration:underline">openfajr.org</a><br>Other times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>';
   } else if (currentCity === 'london') {
     sourceEl.innerHTML = 'All times according to <a href="https://najaf.org/english/prayer/united-kingdom" target="_blank" style="color:inherit;text-decoration:underline">najaf.org</a>';
+  } else if (currentCity === 'munich') {
+    sourceEl.innerHTML = 'Computed for Munich by the University of Tehran<br>(Institute of Geophysics) Shia method &middot; Fajr 17.7&deg;, Maghrib 4.5&deg;, Jafari midnight';
   } else if (currentCity === 'toronto') {
     sourceEl.innerHTML = 'All times according to <a href="http://www.valieasr.org/calendar/Prayer-Times.htm" target="_blank" style="color:inherit;text-decoration:underline">valieasr.org</a>';
   }

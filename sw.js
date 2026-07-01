@@ -1,9 +1,10 @@
-const CACHE_NAME = 'salat-v10';
+const CACHE_NAME = 'salat-v11';
 const ASSETS = [
   './',
   './index.html',
   './data_birmingham.json',
   './data_london.json',
+  './data_munich.json',
   './data_toronto.json',
   './manifest.json',
   './icon-192.png',
